@@ -1,2 +1,2 @@
 # DBConsulting
-Consulting work for Databricks
+Consulting demos for Databricks
