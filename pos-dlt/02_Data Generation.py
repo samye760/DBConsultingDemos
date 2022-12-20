@@ -120,6 +120,10 @@ eval(inventory_change[0])
 
 # COMMAND ----------
 
+print(inventory_change[1])
+
+# COMMAND ----------
+
 # MAGIC %md ##Step 2: Assemble Inventory Snapshots
 # MAGIC 
 # MAGIC Inventory snapshots represent the physical counts taken of products sitting in inventory.  
@@ -317,7 +321,3 @@ client.disconnect()
 # MAGIC |----------------------------------------|-------------------------|------------|-----------------------------------------------------|
 # MAGIC | azure-iot-device                                     | Microsoft Azure IoT Device Library | MIT    | https://pypi.org/project/azure-iot-device/                       |
 # MAGIC | azure-storage-blob                                | Microsoft Azure Blob Storage Client Library for Python| MIT        | https://pypi.org/project/azure-storage-blob/      |
-
-# COMMAND ----------
-
-

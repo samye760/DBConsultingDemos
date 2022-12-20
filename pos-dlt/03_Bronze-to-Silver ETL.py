@@ -361,6 +361,7 @@ def inventory_snapshot():
       .schema(inventory_snapshot_schema)
       .load(config['inventory_snapshot_path'])
       .drop('id')
+      .withColumn("stock", f.when(f.col("quantity") < 10, "low").when(f.col("quantity") < 50, "medium").otherwise("high"))
     )
 
 # COMMAND ----------

@@ -86,7 +86,7 @@ config['eh_sasl'] = 'kafkashaded.org.apache.kafka.common.security.plain.PlainLog
 # config['storage_account_name'] = 'YOUR STORAGE ACCOUNT NAME STRING HERE' # replace with your own credential here temporarily or set up a secret scope with your credential
 config['storage_account_name'] = dbutils.secrets.get("solution-accelerator-cicd","rcg_pos_storage_account_name") 
 
-config['storage_container_name'] = 'pos'
+config['storage_container_name'] = 'pos-dlt'
 
 # config['storage_account_access_key'] = 'YOUR STORAGE ACCOUNT ACCESS KEY HERE' # replace with your own credential here temporarily or set up a secret scope with your credential
 config['storage_account_access_key'] = dbutils.secrets.get("solution-accelerator-cicd","rcg_pos_storage_account_key") 
@@ -113,7 +113,10 @@ conf_key_value = config['storage_account_access_key']
 # determine if not already mounted
 for m in dbutils.fs.mounts():
   mount_exists = (m.mountPoint==config['dbfs_mount_name'])
-  if mount_exists: break
+  if mount_exists: 
+      mount_exists: bool = False
+      dbutils.fs.unmount(config["dbfs_mount_name"])
+      break
 
 # create mount if not exists
 if not mount_exists:
@@ -153,6 +156,20 @@ if not mount_exists:
 # MAGIC 
 # MAGIC * [Upload files via the Azure Portal](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-portal)
 # MAGIC * [Upload files via Azure Storage Explorer](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-storage-explorer)
+
+# COMMAND ----------
+
+# MAGIC %sh
+# MAGIC 
+# MAGIC mkdir -p /dbfs/mnt/pos/generator
+# MAGIC mkdir -p /dbfs/mnt/pos/static_data
+# MAGIC mv /dbfs/mnt/pos/inventory_change_store001.txt /dbfs/mnt/pos/generator 2> /dev/null
+# MAGIC mv /dbfs/mnt/pos/inventory_change_online.txt /dbfs/mnt/pos/generator 2> /dev/null
+# MAGIC mv /dbfs/mnt/pos/inventory_snapshot_store001.txt /dbfs/mnt/pos/generator 2> /dev/null
+# MAGIC mv /dbfs/mnt/pos/inventory_snapshot_online.txt /dbfs/mnt/pos/generator 2> /dev/null
+# MAGIC mv /dbfs/mnt/pos/store.txt /dbfs/mnt/pos/static_data 2> /dev/null
+# MAGIC mv /dbfs/mnt/pos/item.txt /dbfs/mnt/pos/static_data 2> /dev/null
+# MAGIC mv /dbfs/mnt/pos/inventory_change_type.txt /dbfs/mnt/pos/static_data 2> /dev/null
 
 # COMMAND ----------
 
