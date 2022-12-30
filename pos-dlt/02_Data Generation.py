@@ -35,6 +35,9 @@ import pyspark.sql.functions as f
 
 import datetime, time
 
+from random import randint
+from csv import DictReader, DictWriter
+
 from azure.iot.device import IoTHubDeviceClient
 from azure.storage.blob import BlobServiceClient
 
@@ -63,6 +66,41 @@ _ = spark.sql("CREATE DATABASE IF NOT EXISTS {0}".format(config['database']))
 
 # DBTITLE 1,Reset the DLT Environment
 dbutils.fs.rm(config['dlt_pipeline'],True)
+
+# COMMAND ----------
+
+# MAGIC %fs
+# MAGIC 
+# MAGIC ls "/mnt/pos"
+
+# COMMAND ----------
+
+# MAGIC %sh
+# MAGIC 
+# MAGIC head "/dbfs/mnt/pos/static_data/suppier1.txt"
+
+# COMMAND ----------
+
+path: str = "/dbfs/mnt/pos/static_data/"
+
+with open(f"{path}item.txt") as items:
+    items = DictReader(items)
+    with open(f"{path}supplier1.txt", 'w') as supplier1:
+        fieldnames: list[str] = ["item_id", "name", "stock"]
+        supplier1 = DictWriter(supplier1, fieldnames=fieldnames)
+        supplier1.writeheader()
+        with open(f"{path}supplier2.txt", 'w') as supplier2:
+            supplier2 = DictWriter(supplier2, fieldnames=fieldnames)
+            supplier2.writeheader()
+            with open(f"{path}supplier3.txt", 'w') as supplier3:
+                supplier3 = DictWriter(supplier3, fieldnames=fieldnames)
+                supplier3.writeheader()
+                for item in items:
+                    row: str = "{fieldnames[0]: item['item_id'], fieldnames[1]: item['name'], fieldnames[2]: randint(0, 100)}"
+                    supplier1.writerow(eval(row))
+                    supplier2.writerow(eval(row))
+                    supplier3.writerow(eval(row))
+    
 
 # COMMAND ----------
 
