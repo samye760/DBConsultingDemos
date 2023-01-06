@@ -86,22 +86,19 @@ path: str = "/dbfs/mnt/pos/static_data/"
 
 with open(f"{path}item.txt") as items:
     items = DictReader(items)
-    with open(f"{path}supplier1.txt", 'w') as supplier1:
-        fieldnames: List[str] = ["item_id", "name", "stock"]
-        supplier1 = DictWriter(supplier1, fieldnames=fieldnames)
-        supplier1.writeheader()
-        with open(f"{path}supplier2.txt", 'w') as supplier2:
-            supplier2 = DictWriter(supplier2, fieldnames=fieldnames)
-            supplier2.writeheader()
-            with open(f"{path}supplier3.txt", 'w') as supplier3:
-                supplier3 = DictWriter(supplier3, fieldnames=fieldnames)
-                supplier3.writeheader()
-                for item in items:
-                    row: str = "{fieldnames[0]: item['item_id'], fieldnames[1]: item['name'], fieldnames[2]: randint(0, 100)}"
-                    supplier1.writerow(eval(row))
-                    supplier2.writerow(eval(row))
-                    supplier3.writerow(eval(row))
+    with open(f"{path}suppliers.txt", 'w') as suppliers:
+        fields: List[str] = ["item_id", "name", "supplier1", "suppler2", "supplier3"]
+        suppliers = DictWriter(suppliers, fieldnames=fields)
+        suppliers.writeheader()
+        for item in items:
+            suppliers.writerow({fields[0]: item["item_id"], fields[1]: item["name"], fields[2]: randint(0, 100), fields[3]: randint(0, 100), fields[4]: randint(0, 100)})
     
+
+# COMMAND ----------
+
+# MAGIC %sh
+# MAGIC 
+# MAGIC head "/dbfs/mnt/pos/static_data/suppliers.txt"
 
 # COMMAND ----------
 

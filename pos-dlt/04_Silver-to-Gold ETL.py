@@ -116,14 +116,38 @@ def inventory_current_python():
          .withColumn('current_quantity', f.expr('snapshot_quantity + change_quantity'))
          .withColumn('date_time', f.expr('GREATEST(snapshot_datetime, change_datetime)'))
          .drop('snapshot_datetime','change_datetime')
-         .withColumn("inventory_type", f.when(f.rand() > 0.9, "low").when(f.rand() > 0.5, "medium").otherwise("high"))
-         .withColumn("stock", f.when(f.col("inventory_type" == "low", f.when(f.col("current_quantity") < 5, "low").when(f.col("current_quantity")))
-            .when(f.col("current_quantity") < 100, "medium").otherwise("high"))
-         .drop("inventory_type")
-         .orderBy('current_quantity')
+         .withColumn("inventory_type", f.when(f.rand() > 0.9, "low quantity item").when(f.rand() > 0.5, "medium quantity item").otherwise("high quantity item"))
+         .withColumn(
+         "stock_status", f.when(f.col("inventory_type") == "low quantity item", f.when(f.col("current_quantity") < 3, "low").when(f.col("current_quantity") <= 5, "medium quantity item").otherwise("high"))
+           .when(f.col("inventory_type") == "medium quantity item", f.when(f.col("current_quantity") < 10, "low").when(f.col("current_quantity") < 20, "medium").otherwise("high"))
+           .otherwise(f.when(f.col("current_quantity") < 50, "low").when(f.col("current_quantity") < 70, "medium").otherwise("high")))
+         .orderBy('current_quantity', "inventory_type")
          )
    
    return inventory_current_df
+
+# COMMAND ----------
+
+@dlt.table(
+    name="best_supplier",
+    comment="best suppliers for low stock items",
+    table_properties={"quality": "gold"},
+    spark_conf={"pipelines.trigger.interval": "5 minutes"}
+)
+def best_supplier():
+
+    suppliers_df = (
+        dlt.read("inventory_current_python").alias('a')
+          .join(
+              dlt.read("suppliers").alias('b'), on="item_id", how="inner"
+          )
+        .filter(f.col("stock_status") == "low")
+        .withColumn("top_supplier", f.when(f.greatest("supplier1", "supplier2", "supplier3") == f.col("supplier1"), "supplier1")
+          .when(f.greatest("supplier1", "supplier2", "supplier3") == f.col("supplier2"), "supplier2").otherwise("supplier3"))
+        .select("name", "inventory_type", "current_quantity", "top_supplier", "date_time")
+    )
+
+    return suppliers_df
 
 # COMMAND ----------
 

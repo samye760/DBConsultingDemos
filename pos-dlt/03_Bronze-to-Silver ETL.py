@@ -61,9 +61,7 @@ config['event_hub_compatible_endpoint'] = dbutils.secrets.get("solution-accelera
 config['stores_filename'] = config['dbfs_mount_name'] + '/static_data/store.txt'
 config['items_filename'] = config['dbfs_mount_name'] + '/static_data/item.txt'
 config['change_types_filename'] = config['dbfs_mount_name'] + '/static_data/inventory_change_type.txt'
-config["first_supplier"] = config["dbfs_mount_name"] + "/static_data/supplier1.txt"
-config["second_supplier"] = config["dbfs_mount_name"] + "/static_data/supplier2.txt"
-config["third_supplier"] = config["dbfs_mount_name"] + "/static_data/supplier3.txt"
+config["suppliers"] = config["dbfs_mount_name"] + "/static_data/suppliers.txt"
 
 #location of our inventory snapshot files
 config['inventory_snapshot_path'] = config['dbfs_mount_name'] + '/inventory_snapshots/'
@@ -119,63 +117,29 @@ config['eh_sasl'] = 'kafkashaded.org.apache.kafka.common.security.plain.PlainLog
 supplier_schema = StructType([
     StructField("item_id", IntegerType()),
     StructField("name", StringType()),
-    StructField("stock", IntegerType())
+    StructField("stock", IntegerType()),
+    StructField("supplier1", IntegerType()),
+    StructField("supplier2", IntegerType()),
+    StructField("supplier3", IntegerType())
 ])
 
 @dlt.table(
-    name="supplier1",
-    comment="Item stock for supplier 1",
+    name="suppliers",
+    comment="item stocks for suppliers",
     table_properties={"quality": "silver"},
     spark_conf={"pipelines.trigger.interval": "24 hours"}
 )
-def supplier1():
+def suppliers():
     df = (
         spark
         .read
         .csv(
-            config["first_supplier"],
+            config["suppliers"],
             header=True,
             schema=supplier_schema
         )
     )
     return df
-
-@dlt.table(
-    name="supplier2",
-    comment="Item stock for supplier 2",
-    table_properties={"quality": "silver"},
-    spark_conf={"pipelines.trigger.interval": "24 hours"}
-)
-def supplier2():
-    df = (
-        spark
-        .read
-        .csv(
-            config["second_supplier"],
-            header=True,
-            schema=supplier_schema
-        )
-    )
-    return df
-
-@dlt.table(
-    name="supplier3",
-    comment="Item stock for supplier 3",
-    table_properties={"quality": "silver"},
-    spark_conf={"pipelines.trigger.interval": "24 hours"}
-)
-def supplier3():
-    df = (
-        spark
-        .read
-        .csv(
-            config["third_supplier"],
-            header=True,
-            schema=supplier_schema
-        )
-    )
-    return df
-
 
 # COMMAND ----------
 
