@@ -116,7 +116,10 @@ def inventory_current_python():
          .withColumn('current_quantity', f.expr('snapshot_quantity + change_quantity'))
          .withColumn('date_time', f.expr('GREATEST(snapshot_datetime, change_datetime)'))
          .drop('snapshot_datetime','change_datetime')
-         .withColumn("stock", f.when(f.col("current_quantity") < 50, "low").when(f.col("current_quantity") < 100, "medium").otherwise("high"))
+         .withColumn("inventory_type", f.when(f.rand() > 0.9, "low").when(f.rand() > 0.5, "medium").otherwise("high"))
+         .withColumn("stock", f.when(f.col("inventory_type" == "low", f.when(f.col("current_quantity") < 5, "low").when(f.col("current_quantity")))
+            .when(f.col("current_quantity") < 100, "medium").otherwise("high"))
+         .drop("inventory_type")
          .orderBy('current_quantity')
          )
    

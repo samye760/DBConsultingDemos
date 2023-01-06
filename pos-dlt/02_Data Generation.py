@@ -36,6 +36,7 @@ import pyspark.sql.functions as f
 import datetime, time
 
 from random import randint
+from typing import List
 from csv import DictReader, DictWriter
 
 from azure.iot.device import IoTHubDeviceClient
@@ -86,7 +87,7 @@ path: str = "/dbfs/mnt/pos/static_data/"
 with open(f"{path}item.txt") as items:
     items = DictReader(items)
     with open(f"{path}supplier1.txt", 'w') as supplier1:
-        fieldnames: list[str] = ["item_id", "name", "stock"]
+        fieldnames: List[str] = ["item_id", "name", "stock"]
         supplier1 = DictWriter(supplier1, fieldnames=fieldnames)
         supplier1.writeheader()
         with open(f"{path}supplier2.txt", 'w') as supplier2:

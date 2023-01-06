@@ -61,6 +61,9 @@ config['event_hub_compatible_endpoint'] = dbutils.secrets.get("solution-accelera
 config['stores_filename'] = config['dbfs_mount_name'] + '/static_data/store.txt'
 config['items_filename'] = config['dbfs_mount_name'] + '/static_data/item.txt'
 config['change_types_filename'] = config['dbfs_mount_name'] + '/static_data/inventory_change_type.txt'
+config["first_supplier"] = config["dbfs_mount_name"] + "/static_data/supplier1.txt"
+config["second_supplier"] = config["dbfs_mount_name"] + "/static_data/supplier2.txt"
+config["third_supplier"] = config["dbfs_mount_name"] + "/static_data/supplier3.txt"
 
 #location of our inventory snapshot files
 config['inventory_snapshot_path'] = config['dbfs_mount_name'] + '/inventory_snapshots/'
@@ -110,6 +113,69 @@ config['eh_sasl'] = 'kafkashaded.org.apache.kafka.common.security.plain.PlainLog
 # MAGIC The *name* element associated with the *@dlt.table* decorator identifies the name of the table to be created by the DLT engine.  Had we not used this optional element, the function name would have been used as the name of the resulting table. 
 # MAGIC 
 # MAGIC The *spark_conf* element associated with the DLT table defines the frequency with which the table will be run.  At the passing of each interval, the DTL engine will examine the file pointed to by this dataframe to see if there have been any changes.  If there have been, the table will be rewritten using the data processing logic associated with the dataframe definition:
+
+# COMMAND ----------
+
+supplier_schema = StructType([
+    StructField("item_id", IntegerType()),
+    StructField("name", StringType()),
+    StructField("stock", IntegerType())
+])
+
+@dlt.table(
+    name="supplier1",
+    comment="Item stock for supplier 1",
+    table_properties={"quality": "silver"},
+    spark_conf={"pipelines.trigger.interval": "24 hours"}
+)
+def supplier1():
+    df = (
+        spark
+        .read
+        .csv(
+            config["first_supplier"],
+            header=True,
+            schema=supplier_schema
+        )
+    )
+    return df
+
+@dlt.table(
+    name="supplier2",
+    comment="Item stock for supplier 2",
+    table_properties={"quality": "silver"},
+    spark_conf={"pipelines.trigger.interval": "24 hours"}
+)
+def supplier2():
+    df = (
+        spark
+        .read
+        .csv(
+            config["second_supplier"],
+            header=True,
+            schema=supplier_schema
+        )
+    )
+    return df
+
+@dlt.table(
+    name="supplier3",
+    comment="Item stock for supplier 3",
+    table_properties={"quality": "silver"},
+    spark_conf={"pipelines.trigger.interval": "24 hours"}
+)
+def supplier3():
+    df = (
+        spark
+        .read
+        .csv(
+            config["third_supplier"],
+            header=True,
+            schema=supplier_schema
+        )
+    )
+    return df
+
 
 # COMMAND ----------
 
